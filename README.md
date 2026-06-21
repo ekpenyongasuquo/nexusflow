@@ -10,8 +10,8 @@
 > **AI Builders Challenge with IBM Bob — Wildcard Submission**
 > *Built end-to-end with IBM Bob as the active engineering partner across Plan, Orchestrator, Code, and Shell modes*
 
-**Live Demo:** `https://nexusflow.onrender.com`
-**API Docs:** `https://nexusflow.onrender.com/docs`
+**Live Demo:** `https://nexusflow-api-e6u8.onrender.com`
+**API Docs:** `https://nexusflow-api-e6u8.onrender.com/docs`
 
 ---
 
