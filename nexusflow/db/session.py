@@ -19,12 +19,19 @@ from nexusflow.db.models import Base
 settings = get_settings()
 
 # ── Main database engine (PostgreSQL in production, SQLite in dev) ─────────────
+_is_sqlite = settings.database_url.startswith("sqlite")
+
+_main_engine_kwargs = dict(
+    echo=settings.app_env == "development",
+)
+if not _is_sqlite:
+    _main_engine_kwargs["pool_pre_ping"] = True
+    _main_engine_kwargs["pool_size"] = 10
+    _main_engine_kwargs["max_overflow"] = 20
+
 main_engine = create_async_engine(
     settings.database_url,
-    echo=settings.app_env == "development",
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
+    **_main_engine_kwargs,
 )
 
 MainSessionFactory = async_sessionmaker(
