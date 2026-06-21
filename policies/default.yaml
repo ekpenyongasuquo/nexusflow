@@ -1,0 +1,132 @@
+# nexusflow/policies/default.yaml
+# NexusFlow Governance Policy Ruleset
+# Hot-reloadable — no service restart required
+# Version: 1.0.0
+
+version: "1.0.0"
+last_updated: "2026-06-19"
+
+# ── PII Categories to scan for ───────────────────────────────────────────────
+pii_categories:
+  - EMAIL
+  - PHONE_NUMBER
+  - PERSON_NAME
+  - ACCOUNT_NUMBER
+  - CREDIT_CARD
+  - SSN
+  - IP_ADDRESS
+  - DATE_OF_BIRTH
+  - HEALTH_IDENTIFIER
+
+# ── Authority Rules ───────────────────────────────────────────────────────────
+# Who must approve decisions based on trigger type and financial value
+authority_rules:
+  - id: "AUTH-001"
+    trigger_type: "BUDGET_VARIANCE"
+    min_value_usd: 0
+    max_value_usd: 9999
+    required_role: "MANAGER"
+    fallback_role: "DIRECTOR"
+
+  - id: "AUTH-002"
+    trigger_type: "BUDGET_VARIANCE"
+    min_value_usd: 10000
+    max_value_usd: 49999
+    required_role: "DIRECTOR"
+    fallback_role: "VP"
+
+  - id: "AUTH-003"
+    trigger_type: "BUDGET_VARIANCE"
+    min_value_usd: 50000
+    max_value_usd: null
+    required_role: "CFO"
+    fallback_role: "CEO"
+
+  - id: "AUTH-004"
+    trigger_type: "CUSTOMER_ESCALATION"
+    min_value_usd: null
+    max_value_usd: null
+    required_role: "VP"
+    fallback_role: "DIRECTOR"
+
+  - id: "AUTH-005"
+    trigger_type: "COMPLIANCE_DEADLINE"
+    min_value_usd: null
+    max_value_usd: null
+    required_role: "CLO"
+    fallback_role: "CFO"
+
+  - id: "AUTH-006"
+    trigger_type: "PROJECT_STALL"
+    min_value_usd: null
+    max_value_usd: null
+    required_role: "MANAGER"
+    fallback_role: "DIRECTOR"
+
+  - id: "AUTH-007"
+    trigger_type: "ANOMALY_DETECTED"
+    min_value_usd: null
+    max_value_usd: null
+    required_role: "MANAGER"
+    fallback_role: "DIRECTOR"
+
+  - id: "AUTH-008"
+    trigger_type: "MANUAL"
+    min_value_usd: null
+    max_value_usd: null
+    required_role: "MEMBER"
+    fallback_role: "MANAGER"
+
+# ── Policy Rules — compliance checks run by Validator Agent ─────────────────
+policy_rules:
+  - id: "POL-001"
+    name: "No raw PII in decision brief"
+    severity: "CRITICAL"
+    description: "Decision briefs must not contain raw PII entities"
+    action: "HALT"
+
+  - id: "POL-002"
+    name: "Budget decisions require financial impact estimate"
+    severity: "HIGH"
+    description: "Budget variance decisions must have estimated_impact_usd set"
+    trigger_types: ["BUDGET_VARIANCE"]
+    action: "WARN"
+
+  - id: "POL-003"
+    name: "Compliance decisions require legal approval"
+    severity: "CRITICAL"
+    description: "Compliance deadlines must be routed to CLO or CFO"
+    trigger_types: ["COMPLIANCE_DEADLINE"]
+    action: "HALT"
+
+  - id: "POL-004"
+    name: "Minimum confidence threshold"
+    severity: "MEDIUM"
+    description: "Decision briefs with confidence < 0.4 require manual review note"
+    confidence_threshold: 0.4
+    action: "WARN"
+
+  - id: "POL-005"
+    name: "Data retention"
+    severity: "HIGH"
+    description: "Collected corpus data must not be retained beyond 30 days"
+    retention_days: 30
+    action: "AUTO_ENFORCE"
+
+# ── Prohibited Actions ────────────────────────────────────────────────────────
+# The Executor Agent will refuse to perform these action types
+prohibited_actions:
+  - "DELETE_USER"
+  - "DROP_DATABASE"
+  - "TRANSFER_FUNDS_EXTERNAL"
+  - "PUBLISH_PRESS_RELEASE"
+  - "MODIFY_LEGAL_CONTRACT"
+
+# ── Audit Settings ────────────────────────────────────────────────────────────
+audit:
+  hash_algorithm: "SHA-256"
+  chain_enabled: true
+  retention_days: 2555  # 7 years for regulatory compliance
+  export_formats:
+    - "JSON"
+    - "CSV"

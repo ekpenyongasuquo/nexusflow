@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --navy: #0a1628;
+    --cyan: #00b4d8;
+    --slate: #1f3a5f;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-slate-900 border border-slate-800 rounded-xl p-6;
+  }
+  .btn-primary {
+    @apply bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-6 py-3 rounded-lg transition-colors;
+  }
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-500 text-white font-bold px-6 py-3 rounded-lg transition-colors;
+  }
+  .btn-ghost {
+    @apply border border-slate-700 hover:border-slate-500 text-slate-300 px-6 py-3 rounded-lg transition-colors;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
