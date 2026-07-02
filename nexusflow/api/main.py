@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from nexusflow.api.routes import auth, pipelines, admin
+from nexusflow.core.observability import get_metrics_summary
 from nexusflow.core.settings import get_settings
 from nexusflow.db.session import init_db
 
@@ -79,6 +80,12 @@ async def root():
         "docs": "/docs",
         "health": "/health",
     }
+
+
+# ── Observability ─────────────────────────────────────────────────────────────
+@app.get("/metrics", tags=["Observability"])
+async def metrics():
+    return get_metrics_summary()
 
 
 # ── Global exception handler ──────────────────────────────────────────────────

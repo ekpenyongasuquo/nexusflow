@@ -33,6 +33,7 @@ from nexusflow.adapters.github import GitHubAdapter
 from nexusflow.adapters.jira import JiraAdapter
 from nexusflow.adapters.slack import CollectorError, SlackAdapter
 from nexusflow.core.models import CollectedCorpus, PipelineState, PipelineStatus
+from nexusflow.core.observability import trace_node
 from nexusflow.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
@@ -163,6 +164,7 @@ _github_breaker = CircuitBreaker("github")
 
 # ── Agent entry point ─────────────────────────────────────────────────────────
 
+@trace_node("collect")
 async def run_collector_agent(state: PipelineState) -> PipelineState:
     """
     L1 Collector Agent entry point.

@@ -21,6 +21,7 @@ from nexusflow.core.models import (
     PipelineStatus,
     TriggerType,
 )
+from nexusflow.core.observability import MetricsCollector, PipelineMetrics
 from nexusflow.core.state.pipeline import run_execute_stage, run_pipeline
 from nexusflow.db.audit import verify_chain_integrity, write_audit_receipt
 from nexusflow.db.models import Pipeline, User
@@ -295,6 +296,7 @@ async def _run_pipeline_background(state: PipelineState, pipeline_id: str):
     start_time = datetime.now(timezone.utc)
     try:
         result_state = await run_pipeline(state)
+        MetricsCollector.instance().record(PipelineMetrics.from_state(result_state))
 
         async with MainSessionFactory() as session:
             db_result = await session.execute(
