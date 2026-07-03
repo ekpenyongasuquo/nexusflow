@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     salesforce_instance_url: str = ""
     pagerduty_api_key: str = ""
     linear_api_key: str = ""
+    confluence_base_url: str = ""
+    confluence_email: str = ""
+    confluence_api_token: str = ""
 
     # ── Pipeline Config ───────────────────────────────────────────────────────
     policy_file_path: str = "./policies/default.yaml"

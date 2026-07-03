@@ -125,6 +125,24 @@ class LinearComment(BaseModel):
     created_at: datetime
 
 
+class ConfluencePage(BaseModel):
+    id: str
+    title: str
+    space_key: str
+    created_at: datetime
+    updated_at: datetime
+    author: str
+    url: str
+    excerpt: str = ""
+
+
+class ConfluenceComment(BaseModel):
+    id: str
+    body: str
+    author: str
+    created_at: datetime
+
+
 class CollectedCorpus(BaseModel):
     """Output of L1 Collector Agents — typed corpus of all raw signals."""
     pipeline_id: str
