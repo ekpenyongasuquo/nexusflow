@@ -86,6 +86,25 @@ class GitHubPR(BaseModel):
     labels: list[str] = Field(default_factory=list)
 
 
+class PagerDutyIncident(BaseModel):
+    id: str
+    title: str
+    status: str
+    urgency: str
+    created_at: datetime
+    service_name: str
+    assigned_to: list[str] = Field(default_factory=list)
+    html_url: str
+
+
+class PagerDutyAlert(BaseModel):
+    id: str
+    summary: str
+    severity: str
+    created_at: datetime
+    body_details: dict[str, Any] = Field(default_factory=dict)
+
+
 class CollectedCorpus(BaseModel):
     """Output of L1 Collector Agents — typed corpus of all raw signals."""
     pipeline_id: str

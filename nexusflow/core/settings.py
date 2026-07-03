@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     salesforce_client_id: str = ""
     salesforce_client_secret: str = ""
     salesforce_instance_url: str = ""
+    pagerduty_api_key: str = ""
 
     # ── Pipeline Config ───────────────────────────────────────────────────────
     policy_file_path: str = "./policies/default.yaml"
