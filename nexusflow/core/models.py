@@ -105,6 +105,26 @@ class PagerDutyAlert(BaseModel):
     body_details: dict[str, Any] = Field(default_factory=dict)
 
 
+class LinearIssue(BaseModel):
+    id: str
+    title: str
+    state: str
+    priority: int
+    assignee: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    team_name: str
+    url: str
+    labels: list[str] = Field(default_factory=list)
+
+
+class LinearComment(BaseModel):
+    id: str
+    body: str
+    author: str
+    created_at: datetime
+
+
 class CollectedCorpus(BaseModel):
     """Output of L1 Collector Agents — typed corpus of all raw signals."""
     pipeline_id: str
