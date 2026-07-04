@@ -105,6 +105,29 @@ class PagerDutyAlert(BaseModel):
     body_details: dict[str, Any] = Field(default_factory=dict)
 
 
+class DatadogMonitor(BaseModel):
+    id: int
+    name: str
+    status: str
+    type: str
+    message: str
+    created_at: datetime
+    updated_at: datetime
+    tags: list[str] = Field(default_factory=list)
+    query: str
+
+
+class DatadogEvent(BaseModel):
+    id: str
+    title: str
+    text: str
+    priority: str
+    status: str
+    created_at: datetime
+    tags: list[str] = Field(default_factory=list)
+    host: str
+
+
 class LinearIssue(BaseModel):
     id: str
     title: str

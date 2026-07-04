@@ -49,6 +49,8 @@ class Settings(BaseSettings):
     salesforce_client_secret: str = ""
     salesforce_instance_url: str = ""
     pagerduty_api_key: str = ""
+    datadog_api_key: str = ""
+    datadog_app_key: str = ""
     linear_api_key: str = ""
     confluence_base_url: str = ""
     confluence_email: str = ""
