@@ -128,6 +128,29 @@ class DatadogEvent(BaseModel):
     host: str
 
 
+class SentryIssue(BaseModel):
+    id: str
+    title: str
+    culprit: str
+    status: str
+    level: str
+    first_seen: datetime
+    last_seen: datetime
+    count: int
+    assignee: str | None = None
+    project_slug: str
+    url: str
+
+
+class SentryEvent(BaseModel):
+    id: str
+    message: str
+    platform: str
+    timestamp: datetime
+    tags: list[str] = Field(default_factory=list)
+    environment: str
+
+
 class LinearIssue(BaseModel):
     id: str
     title: str

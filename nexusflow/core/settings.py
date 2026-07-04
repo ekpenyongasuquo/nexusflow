@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     pagerduty_api_key: str = ""
     datadog_api_key: str = ""
     datadog_app_key: str = ""
+    sentry_auth_token: str = ""
+    sentry_org_slug: str = ""
     linear_api_key: str = ""
     confluence_base_url: str = ""
     confluence_email: str = ""
