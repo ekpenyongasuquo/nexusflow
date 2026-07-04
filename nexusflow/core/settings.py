@@ -53,6 +53,8 @@ class Settings(BaseSettings):
     datadog_app_key: str = ""
     sentry_auth_token: str = ""
     sentry_org_slug: str = ""
+    notion_secret: str = ""
+    notion_database_id: str = ""
     linear_api_key: str = ""
     confluence_base_url: str = ""
     confluence_email: str = ""

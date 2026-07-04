@@ -151,6 +151,24 @@ class SentryEvent(BaseModel):
     environment: str
 
 
+class NotionPage(BaseModel):
+    id: str
+    title: str
+    status: str | None = None
+    assignee: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    url: str
+    properties: dict[str, Any] = Field(default_factory=dict)
+
+
+class NotionComment(BaseModel):
+    id: str
+    text: str
+    author: str
+    created_at: datetime
+
+
 class LinearIssue(BaseModel):
     id: str
     title: str
