@@ -169,6 +169,19 @@ class NotionComment(BaseModel):
     created_at: datetime
 
 
+class CalendarEvent(BaseModel):
+    id: str
+    title: str
+    description: str | None = None
+    status: str
+    start_time: datetime
+    end_time: datetime
+    organizer: str
+    attendees: list[str] = Field(default_factory=list)
+    location: str | None = None
+    html_link: str
+
+
 class LinearIssue(BaseModel):
     id: str
     title: str
