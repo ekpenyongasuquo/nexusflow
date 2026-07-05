@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     confluence_api_token: str = ""
     google_calendar_access_token: str = ""
     google_calendar_id: str = ""
+    sendgrid_api_key: str = ""
+    sendgrid_from_email: str = ""
 
     # ── Pipeline Config ───────────────────────────────────────────────────────
     policy_file_path: str = "./policies/default.yaml"

@@ -220,6 +220,25 @@ class ConfluenceComment(BaseModel):
     created_at: datetime
 
 
+class SendGridBounce(BaseModel):
+    email: str
+    created_at: datetime
+    reason: str
+    status: str
+    source_ip: str
+
+
+class SendGridStat(BaseModel):
+    date: str           # ISO date string, e.g. "2024-01-15"
+    requests: int
+    delivered: int
+    opens: int
+    clicks: int
+    bounces: int
+    spam_reports: int
+    unsubscribes: int
+
+
 class CollectedCorpus(BaseModel):
     """Output of L1 Collector Agents — typed corpus of all raw signals."""
     pipeline_id: str
