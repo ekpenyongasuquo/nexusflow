@@ -2,6 +2,15 @@
 nexusflow/agents/executor.py
 L5 Executor Agent — executes the human-approved decision,
 triggers downstream actions, and writes the immutable audit receipt.
+
+Approval Gateway
+----------------
+The very first action of ``run_executor_agent`` is to run
+``ApprovalGateway().validate_decision(state)``.  If the result is not
+approved, the pipeline is immediately set to ``HALTED_COMPLIANCE`` and
+returned with no side effects.  This prevents stale replays, hallucinated
+option IDs, and under-privileged approvers from ever reaching the
+downstream adapters.
 """
 from __future__ import annotations
 
@@ -10,6 +19,11 @@ from datetime import datetime, timezone
 
 from nexusflow.adapters.jira import JiraAdapter
 from nexusflow.adapters.slack import SlackAdapter
+from nexusflow.core.approval_gateway import (
+    ApprovalGateway,
+    ApprovalGatewayError,
+    GatewayResult,
+)
 from nexusflow.core.models import (
     AuditReceipt,
     DecisionOutcome,
@@ -32,11 +46,57 @@ async def run_executor_agent(
 
     Input:  PipelineState with human_decision populated
     Output: PipelineState with receipt populated and status=COMPLETE
+
+    The ``ApprovalGateway`` is the first thing that runs.  It checks:
+    - ``human_decision`` is present
+    - ``selected_option_id`` resolves to a known recommendation option
+    - The decision is not older than 30 minutes
+    - The approver's role satisfies the policy-required role
+
+    If any check fails the state is immediately set to
+    ``HALTED_COMPLIANCE`` and the function returns without executing
+    any downstream actions.
     """
     logger.info("[L5-EXECUTOR] Pipeline %s — executing decision", state.pipeline_id)
     state.status = PipelineStatus.EXECUTING
 
+    # ── Approval Gateway pre-flight ────────────────────────────────────────────
+    try:
+        gateway_result: GatewayResult = ApprovalGateway().validate_decision(state)
+    except ApprovalGatewayError as exc:
+        # validate_decision already emits the [APPROVAL-GATEWAY] BLOCKED log;
+        # we record it on the state and halt.
+        logger.error(
+            "[L5-EXECUTOR] Pipeline %s — gateway blocked execution: %s",
+            state.pipeline_id, exc,
+        )
+        state.status = PipelineStatus.HALTED_COMPLIANCE
+        state.error_stage = "APPROVAL_GATEWAY"
+        state.error_message = str(exc)
+        return state
+
+    if not gateway_result.approved:
+        # Should not be reached (validate_decision raises on failure), but
+        # kept as a belt-and-suspenders guard in case the exception is caught
+        # upstream and execution is attempted again.
+        logger.error(
+            "[L5-EXECUTOR] Pipeline %s — gateway returned approved=False "
+            "without raising; halting. Reason: %s",
+            state.pipeline_id, gateway_result.reason,
+        )
+        state.status = PipelineStatus.HALTED_COMPLIANCE
+        state.error_stage = "APPROVAL_GATEWAY"
+        state.error_message = gateway_result.reason
+        return state
+
+    # Gateway passed — log the green-light and proceed.
+    logger.info(
+        "[L5-EXECUTOR] Pipeline %s — gateway passed, proceeding with execution.",
+        state.pipeline_id,
+    )
+
     if not state.human_decision:
+        # Unreachable post-gateway, but satisfies the type-checker.
         state.status = PipelineStatus.FAILED
         state.error_stage = "EXECUTOR"
         state.error_message = "No human decision found"
