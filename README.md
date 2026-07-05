@@ -5,13 +5,16 @@
 [![Challenge](https://img.shields.io/badge/Track-Wildcard%20Future%20of%20Work-00B4D8?style=for-the-badge)](https://aibuilderschallenge-bobhub.bemyapp.com)
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge)](https://fastapi.tiangolo.com)
+[![Live](https://img.shields.io/badge/Live-Render-46E3B7?style=for-the-badge)](https://nexusflow-api-e6u8.onrender.com)
 [![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
 
-> **AI Builders Challenge with IBM Bob — Wildcard Submission**
-> *Built end-to-end with IBM Bob as the active engineering partner across Plan, Orchestrator, Code, and Shell modes*
+> **AI Builders Challenge with IBM Bob — Wildcard: Future of Work**
+> *Built end-to-end with IBM Bob as the active engineering partner across Plan, Code, Orchestrator, and Shell modes*
 
-**Live Demo:** `https://nexusflow-api-e6u8.onrender.com`
-**API Docs:** `https://nexusflow-api-e6u8.onrender.com/docs`
+**🔴 Live API:** https://nexusflow-api-e6u8.onrender.com
+**📖 API Docs:** https://nexusflow-api-e6u8.onrender.com/docs
+**📊 Metrics:** https://nexusflow-api-e6u8.onrender.com/metrics
+**💻 GitHub:** https://github.com/ekpenyongasuquo/nexusflow
 
 ---
 
@@ -19,9 +22,7 @@
 
 Modern distributed enterprises lose **$200K–$3M annually per team** to what analysts call *Decision Debt* — the compounding cost of delayed, fragmented, or uninformed decisions made across siloed tools.
 
-The root cause: **no system exists that connects cross-functional context** from Slack, JIRA, Confluence, CRMs, and financial dashboards into a single, actionable decision with a fully auditable reasoning chain.
-
-The impact is severe and measurable:
+The root cause: **no system connects cross-functional context** from Slack, JIRA, Confluence, CRMs, and financial dashboards into a single, actionable decision with a fully auditable reasoning chain.
 
 | Pain Point | Data |
 |------------|------|
@@ -38,10 +39,10 @@ Existing tools — Microsoft Copilot, Notion AI, Salesforce Einstein — are cha
 
 **NexusFlow** is an Autonomous Decision Intelligence Platform. It deploys five specialised AI agents that operate continuously across your enterprise tool ecosystem.
 
-When a decision trigger fires — a budget variance, project stall, customer escalation, or compliance deadline — NexusFlow:
+When a decision trigger fires, NexusFlow:
 
-1. **Collects** all relevant signals from 12 connected enterprise tools via MCP adapters
-2. **Synthesises** a structured decision brief: context summary, causal chain, risk matrix
+1. **Collects** all relevant signals from 11 connected enterprise tools via MCP adapters
+2. **Synthesises** a structured decision brief with context summary, causal chain, and risk matrix
 3. **Validates** for PII, policy compliance, and routes to the correct human approver
 4. **Recommends** three ranked options with projected ROI outcomes
 5. **Executes** the approved decision, updates all connected systems, and writes an immutable cryptographic audit receipt
@@ -52,33 +53,32 @@ When a decision trigger fires — a budget variance, project stall, customer esc
 
 ## 🤖 AI Approach & Multi-Agent Architecture
 
-### Agent Pipeline
-
 ```
 ENTERPRISE EVENT TRIGGER
 (budget variance / project stall / escalation / compliance deadline)
         │
         ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  L1: COLLECTOR AGENTS  ×12  (IBM Granite 3.3 — 2B)             │
-│  MCP adapters → Slack · JIRA · GitHub · Salesforce · NetSuite  │
-│  Concurrent async fetch · pagination · rate-limit handling      │
+│  L1: COLLECTOR AGENTS  ×11  (IBM Granite 3.3 — 2B)             │
+│  MCP adapters → Slack · JIRA · GitHub · PagerDuty · Linear     │
+│  Confluence · Datadog · Sentry · Notion · Calendar · SendGrid  │
+│  Circuit breaker · concurrent async · rate-limit handling       │
 └───────────────────────────┬─────────────────────────────────────┘
                             │ Typed CollectedCorpus
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  L2: SYNTHESISER AGENT  (Llama 3.3 — 70B via OpenRouter)       │
 │  FAISS + BM25 hybrid index → Reciprocal Rank Fusion retrieval   │
-│  Output: DecisionBrief {context_summary, causal_chain,          │
-│          risk_matrix, estimated_impact_usd, confidence_score}   │
+│  Episodic Memory injection → learns from past decisions         │
+│  Output: DecisionBrief {context, causal_chain, risk_matrix}     │
 └───────────────────────────┬─────────────────────────────────────┘
                             │ DecisionBrief
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  L3: VALIDATOR AGENT  (IBM Granite 3.3 — 8B)                   │
-│  PII regex scan → pseudonymise → policy YAML enforcement        │
+│  PII regex scan → pseudonymise → hot-reloadable YAML policy     │
 │  Authority graph resolution → required approver role routing    │
-│  Hot-reloadable YAML ruleset (no restart required)              │
+│  Retry loop (max 2) → confidence route node                     │
 └───────────────────────────┬─────────────────────────────────────┘
                             │ ValidationResult
                             ▼
@@ -89,209 +89,184 @@ ENTERPRISE EVENT TRIGGER
 └───────────────────────────┬─────────────────────────────────────┘
                             │ RecommendationPackage
                             ▼
-               ┌────────────────────────┐
+               ┌────────────────────────────┐
+               │   APPROVAL GATEWAY         │
+               │   Role validation          │
+               │   Timeout check (30 min)   │
+               │   Anti-hallucination guard │
+               └───────────┬────────────────┘
+                           │
+               ┌───────────┴────────────┐
                │   HUMAN APPROVER       │
-               │   Mobile approval UI   │
-               │   One-tap: Approve /   │
-               │   Reject / Escalate /  │
-               │   Defer                │
+               │   One-tap mobile UI    │
+               │   Approve/Reject/      │
+               │   Escalate/Defer       │
                └───────────┬────────────┘
                            │ HumanDecision
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │  L5: EXECUTOR AGENT  (IBM Granite 3.3 — 2B)                    │
-│  Execute approved action → update Slack · JIRA · CRM           │
+│  Execute approved action → update Slack · JIRA · systems       │
 │  Write immutable SHA-256 audit receipt → SQLite chain           │
-│  Bob Shell trace log generated for every action                 │
+│  Store episode in Episodic Memory for future recall             │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
-### Multi-Model Cost Routing
-
-| Task | Model | Latency | Cost/1K tokens |
-|------|-------|---------|----------------|
-| PII scanning & classification | IBM Granite 3.3 (2B) | <200ms | ~$0.0001 |
-| Policy rule matching | IBM Granite 3.3 (8B) | <500ms | ~$0.0004 |
-| Decision brief synthesis | Llama 3.3 (70B) | <3s | ~$0.003 |
-| Multi-option recommendation | Mixtral 8×7B MoE | <2s | ~$0.002 |
-| Execution action planning | IBM Granite 3.3 (2B) | <300ms | ~$0.0001 |
 
 ---
 
 ## 🔵 IBM Bob Implementation Details
 
-IBM Bob was used as an **active engineering partner across the entire SDLC**, not as a passive code generator.
+IBM Bob was used as the **active engineering partner across the entire SDLC** — not as a passive code generator.
 
-### Plan Mode — Architecture & Specification
+### IBM Bob Commit Trail
 
-Before writing a single line of code, IBM Bob Plan Mode was used to:
+| # | Commit | Lines | Bob Mode |
+|---|--------|-------|----------|
+| 1 | Circuit breaker on MCP collector agents | +210 | Code Mode |
+| 2 | LangGraph fixes — TypedDict state, retry loop, confidence route | +295 | Code Mode |
+| 3 | Observability module — trace decorator, metrics collector | +395 | Code Mode |
+| 4 | Wire observability into agents, pipeline, main app | +11 | Code Mode |
+| 5 | PagerDuty MCP adapter — incidents, alerts | +264 | Code Mode |
+| 6 | Linear MCP adapter — issues, comments | +347 | Code Mode |
+| 7 | Confluence MCP adapter — pages, comments | +356 | Code Mode |
+| 8 | Datadog MCP adapter — monitors, events | +300 | Code Mode |
+| 9 | Sentry MCP adapter — issues, events | +308 | Code Mode |
+| 10 | Notion MCP adapter — pages, comments | +342 | Code Mode |
+| 11 | Google Calendar MCP adapter — events | +324 | Code Mode |
+| 12 | SendGrid MCP adapter — bounces, stats, notifications | +364 | Code Mode |
+| 13 | Episodic memory store — adaptive learning, BM25 recall | +575 | Code Mode |
+| 14 | Approval Gateway — role validation, timeout, executor wiring | +461 | Code Mode |
+| 15 | Wire all 11 MCP adapters into Collector Agent | +352 | Code Mode |
+| 16 | Bob Shell audit trail — full project inventory | +274 | Shell Mode |
 
-- Generate the complete **47-entity domain model** with typed contracts between all agents
-- Design the **12-state pipeline state machine** covering all transitions and failure modes
-- Identify and document **19 failure modes** with recovery specifications
+**Total: 4,878 lines written by IBM Bob across 16 commits**
+
+See full audit log: [BOB_SHELL_AUDIT_TRAIL.md](BOB_SHELL_AUDIT_TRAIL.md)
+
+### Plan Mode — Architecture Specification
+
+Before writing any code, IBM Bob Plan Mode:
+- Generated the complete 47-entity domain model
+- Designed the 12-state LangGraph pipeline state machine
+- Identified and documented 19 failure modes with recovery specs
 
 **Key Plan Mode prompt:**
 ```
-bob plan 'You are a senior enterprise software architect. I am building
-a multi-agent decision intelligence platform for distributed teams.
-Define the complete domain model: entities, relationships, state transitions,
-and data flows. Validate all edge cases for a decision lifecycle from trigger
-detection to audit receipt. Output a structured specification with entity
-definitions, API contracts, and a state machine diagram in ASCII.'
+bob plan 'Define the NexusFlow domain model. Output: entity definitions,
+API contracts, state transitions, and a 12-state machine ASCII diagram.
+Validate all edge cases for decision lifecycle from trigger to audit receipt.'
 ```
 
-### Orchestrator Mode — Multi-Agent Pipeline
-
-Bob Orchestrator Mode built the LangGraph state machine connecting all five agents:
-
-```
-bob orchestrate 'Build an async LangGraph state machine for the NexusFlow
-agent pipeline. State nodes: collect → synthesise → validate → recommend
-→ await_human → execute. Each node is an isolated async Python function
-with a typed input/output contract. On failure at any node: log to Bob Shell,
-set pipeline_status=FAILED, write error receipt, halt. No shared global state
-between nodes. Output complete Python implementation.'
-```
-
-Output: 340-line typed LangGraph pipeline with zero shared mutable state.
-
-### Code Mode — Module Implementation
-
-Bob Code Mode implemented every major system component:
-
-- **12 MCP Adapters** (Slack, JIRA, GitHub, Salesforce, NetSuite, Confluence, Linear, PagerDuty, Zendesk, HubSpot, Notion, Google Drive) — typed output contracts, pagination, rate limiting
-- **FAISS Hybrid Indexer** — BM25 + dense embeddings with Reciprocal Rank Fusion, no GPU
-- **Policy Engine** — hot-reloadable YAML governance ruleset
-- **Authority Graph Resolver** — org-chart walker with RBAC routing
-- **Audit Receipt Chain** — SHA-256 hash chain with tamper detection
-
-**Example Code Mode prompt (Slack adapter):**
-```
-bob code 'Write a Python async MCP adapter for the Slack API.
-It must:
-- Accept channel_id and lookback_hours parameters
-- Return list of SlackMessage(id, author, timestamp, content, thread_ts)
-- Handle pagination, rate limits (1 req/sec), auth token rotation
-- Raise CollectorError with retry_after on 429 responses
-- Include full type annotations and pytest suite with mock fixtures
-No third-party SDK — use httpx for all HTTP calls.'
-```
-
-### Bob Shell (CLI) — Automation & Audit Trail
-
-Every terminal operation was executed through Bob Shell, creating a self-documenting, auditable development log:
+### Code Mode — Key modules built by Bob
 
 ```bash
-# Day 1 — Project scaffold
-bob shell 'Create FastAPI project structure:
-  nexusflow/agents/, adapters/, api/, core/, db/, tests/
-  Generate __init__.py for each. Create pyproject.toml
-  with all required dependencies.'
+bob code 'Add a circuit breaker to MCP collector agents so a flaky
+JIRA rate-limit does not stall the entire LangGraph pipeline.
+After 3 failures the circuit OPENS for 60 seconds. Log all state
+changes with [CIRCUIT-BREAKER] prefix.'
 
-# Day 2 — Test execution
-bob shell 'Run pytest nexusflow/tests/ --cov=nexusflow --cov-report=term-missing.
-  If any test fails, output the full failure trace and suggest a fix.'
+bob code 'Fix LangGraph gaps: TypedDict AgentState, validator retry
+loop (max 2), confidence-score route node after Synthesiser.'
 
-# Day 3 — Security audit
-bob shell 'Run bandit -r nexusflow/ and semgrep --config auto nexusflow/.
-  Report all HIGH and CRITICAL severity findings with line numbers
-  and remediation steps.'
-
-# Day 4 — Deployment
-bob shell 'Build Docker image nexusflow:1.0.0. Run container health check.
-  Generate deployment receipt with image SHA-256 digest.'
+bob code 'Build episodic memory store — BM25 recall, SQLite persistence,
+inject top 3 past episodes into Synthesiser LLM prompt.'
 ```
 
-Bob Shell trace logs are stored in `.bob-shell-log/` in the repository, providing a forensic record of every build step.
+### Shell Mode — Audit Trail
+
+```bash
+bob shell 'Scan all Python files, count LOC per module, list all
+MCP adapters and agents, generate full project summary report.
+Save as BOB_SHELL_AUDIT_TRAIL.md'
+```
 
 ---
 
-## ⚙️ Installation & Setup Guide
+## 🔌 MCP Adapters — 11 Enterprise Tool Integrations
 
-### Prerequisites
-- Python 3.12+
-- Node.js 20+ (frontend)
-- PostgreSQL 15+ (or SQLite for local dev)
-- Docker & Docker Compose (recommended)
-- IBM Bob CLI (activate at `ibm.biz/university-bob`)
+| Adapter | Data Collected | Key Methods |
+|---------|---------------|-------------|
+| **Slack** | Messages, threads | `fetch_messages()`, `post_message()` |
+| **JIRA** | Tickets, status | `fetch_tickets()`, `create_ticket()` |
+| **GitHub** | Pull requests | `fetch_pull_requests()` |
+| **PagerDuty** | Incidents, alerts | `fetch_incidents()`, `fetch_alerts()` |
+| **Linear** | Issues, comments | `fetch_issues()`, `fetch_comments()` |
+| **Confluence** | Pages, comments | `fetch_pages()`, `fetch_comments()` |
+| **Datadog** | Monitors, events | `fetch_monitors()`, `fetch_events()` |
+| **Sentry** | Issues, events | `fetch_issues()`, `fetch_events()` |
+| **Notion** | Pages, comments | `fetch_pages()`, `fetch_comments()` |
+| **Google Calendar** | Events, upcoming | `fetch_events()`, `fetch_upcoming()` |
+| **SendGrid** | Bounces, stats | `fetch_bounces()`, `send_notification()` |
 
-### Option A — Docker Compose (Recommended)
+All adapters implement the same pattern: circuit breaker, rate-limit handling, typed return objects, and graceful partial failure tolerance.
 
+---
+
+## 🛡️ Key Modules
+
+### Circuit Breaker
+Prevents a flaky adapter from stalling the entire pipeline. After 3 consecutive failures the circuit OPENS and skips that adapter for 60 seconds.
+
+### Approval Gateway
+Anti-hallucination safety layer. Validates that the human decision is present, not stale (< 30 minutes old), and that the approver role matches the policy-required role before the Executor fires.
+
+### Episodic Memory Store
+Turns NexusFlow from stateless automation into adaptive intelligence. Stores completed pipeline episodes in SQLite, recalls top 3 similar past decisions via BM25 search, and injects them into the Synthesiser LLM prompt as context.
+
+### Observability Module
+`@trace_node` decorator threads a `run_id` through every agent. `MetricsCollector` stores last 100 pipeline runs in memory. `/metrics` endpoint exposes success rates, avg durations, and outcome distributions.
+
+### SHA-256 Audit Receipt Chain
+Every pipeline action generates a receipt hashed to the previous one — tamper-evident by design. Stored in append-only SQLite. Verifiable via `GET /pipelines/audit/chain-integrity`.
+
+---
+
+## ⚙️ Installation & Setup
+
+### Option A — Docker Compose
 ```bash
-# 1. Clone repository
 git clone https://github.com/ekpenyongasuquo/nexusflow.git
 cd nexusflow
-
-# 2. Configure environment
 cp .env.example .env
-# Edit .env — add your API keys
-
-# 3. Start all services
+# Edit .env with your API keys
 docker compose up --build
-
 # API: http://localhost:8000/docs
-# Frontend: http://localhost:3000
 ```
 
-### Option B — Local Development
-
+### Option B — Local
 ```bash
-# 1. Clone and enter project
 git clone https://github.com/ekpenyongasuquo/nexusflow.git
 cd nexusflow
-
-# 2. Install backend dependencies
 pip install -r requirements.txt
-
-# 3. Configure environment
 cp .env.example .env
-# Edit .env with your credentials
-
-# 4. Start the API
 uvicorn nexusflow.api.main:app --reload --port 8000
-# Docs: http://localhost:8000/docs
-
-# 5. In a new terminal — start the frontend
-cd frontend
-npm install
-npm run dev
-# Open: http://localhost:3000
 ```
 
-### Option C — IBM Bob Shell (Recommended for IBM Bob challenge)
+### Key Environment Variables
 
-```bash
-# IBM Bob handles the entire setup:
-bob shell 'Clone nexusflow repo, install Python dependencies,
-  configure .env from template, run database migrations,
-  start FastAPI on port 8000 and Next.js on port 3000.
-  Run health checks on both services and output status summary.'
-```
+| Variable | Description |
+|----------|-------------|
+| `SECRET_KEY` | JWT signing key (min 32 chars) |
+| `OPENROUTER_API_KEY` | Llama 3.3 + Mixtral via OpenRouter |
+| `SLACK_BOT_TOKEN` | Slack bot token |
+| `JIRA_API_TOKEN` | Atlassian API token |
+| `GITHUB_TOKEN` | GitHub personal access token |
+| `PAGERDUTY_API_KEY` | PagerDuty API key |
+| `LINEAR_API_KEY` | Linear API key |
+| `DATADOG_API_KEY` | Datadog API key |
+| `SENTRY_AUTH_TOKEN` | Sentry auth token |
+| `NOTION_SECRET` | Notion integration secret |
 
-### Running Tests
+---
 
-```bash
-# Standard pytest
-pytest nexusflow/tests/ --cov=nexusflow --cov-report=term-missing
+## 🏆 Challenge Theme — Wildcard: Future of Work
 
-# Via IBM Bob Shell
-bob shell 'Run full test suite: pytest nexusflow/tests/ --cov=nexusflow.
-  Output coverage report. Flag any tests below 90% coverage.'
-
-# Expected: 47 tests, >90% coverage
-```
-
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `SECRET_KEY` | Yes | JWT signing key (min 32 chars) |
-| `SLACK_BOT_TOKEN` | For Slack | `xoxb-...` bot token |
-| `JIRA_API_TOKEN` | For JIRA | Atlassian API token |
-| `GITHUB_TOKEN` | For GitHub | Personal access token |
-| `OPENROUTER_API_KEY` | For LLM | OpenRouter API key (Llama + Mixtral) |
-| `IBM_BOB_API_KEY` | For IBM Bob | Activated July 1 |
+| Challenge Goal | NexusFlow Answer |
+|----------------|-----------------|
+| Reduce repetitive work | Eliminates 11-day manual decision facilitation cycles |
+| Improve decision-making | Cross-platform context synthesis + risk matrix + 3 ranked options |
+| Help teams achieve outcomes faster | Decision lifecycle: 11 days → under 5 minutes |
+| AI as true collaborator | IBM Bob wrote 4,878 lines as active engineering partner |
 
 ---
 
@@ -301,96 +276,51 @@ bob shell 'Run full test suite: pytest nexusflow/tests/ --cov=nexusflow.
 nexusflow/
 ├── nexusflow/
 │   ├── agents/
-│   │   ├── collector.py      # L1 — concurrent MCP adapter orchestration
-│   │   ├── synthesiser.py    # L2 — FAISS hybrid index + LLM brief generation
-│   │   ├── validator.py      # L3 — PII scan, policy enforcement, authority graph
-│   │   ├── recommender.py    # L4 — 3 ranked options with ROI projections
-│   │   └── executor.py       # L5 — action execution + audit receipt writer
-│   ├── adapters/
-│   │   ├── slack.py          # Slack MCP adapter (pagination, rate limiting)
-│   │   ├── jira.py           # JIRA Cloud REST adapter
-│   │   └── github.py         # GitHub REST adapter
+│   │   ├── collector.py       # L1 — 11 adapters, circuit breaker
+│   │   ├── synthesiser.py     # L2 — FAISS+BM25, episodic memory
+│   │   ├── validator.py       # L3 — PII scan, policy, retry loop
+│   │   ├── recommender.py     # L4 — 3 ranked options, ROI
+│   │   └── executor.py        # L5 — execution, audit receipt
+│   ├── adapters/              # 11 MCP tool adapters
+│   │   ├── slack.py
+│   │   ├── jira.py
+│   │   ├── github.py
+│   │   ├── pagerduty.py
+│   │   ├── linear.py
+│   │   ├── confluence.py
+│   │   ├── datadog.py
+│   │   ├── sentry.py
+│   │   ├── notion.py
+│   │   ├── google_calendar.py
+│   │   └── sendgrid.py
 │   ├── api/
-│   │   ├── main.py           # FastAPI app, CORS, lifespan
-│   │   ├── routes/
-│   │   │   ├── auth.py       # Register, login, JWT
-│   │   │   ├── pipelines.py  # Trigger, status, approve, audit
-│   │   │   └── admin.py      # Authority rules, policy reload
-│   │   └── middleware/
-│   │       └── auth.py       # JWT + RBAC
+│   │   ├── main.py            # FastAPI app + /metrics endpoint
+│   │   └── routes/
+│   │       ├── auth.py        # Register, login, JWT
+│   │       ├── pipelines.py   # Trigger, approve, audit
+│   │       └── admin.py       # Authority rules, policy reload
 │   ├── core/
-│   │   ├── models.py         # All Pydantic domain entities
-│   │   ├── settings.py       # Pydantic-settings config
-│   │   ├── indexer.py        # FAISS + BM25 hybrid indexer
+│   │   ├── models.py          # 25+ Pydantic domain entities
+│   │   ├── settings.py        # All env var config
+│   │   ├── indexer.py         # FAISS + BM25 hybrid search
+│   │   ├── memory.py          # Episodic memory store
+│   │   ├── observability.py   # Trace decorator, metrics
+│   │   ├── approval_gateway.py # Anti-hallucination safety
 │   │   └── state/
-│   │       └── pipeline.py   # LangGraph state machine
+│   │       └── pipeline.py    # LangGraph state machine
 │   ├── db/
-│   │   ├── models.py         # SQLAlchemy ORM
-│   │   ├── session.py        # Async engine + session factories
+│   │   ├── models.py          # SQLAlchemy ORM
+│   │   ├── session.py         # Async engine factories
 │   │   └── audit.py          # SHA-256 hash chain writer
-│   └── tests/
-│       ├── test_models.py
-│       ├── test_indexer.py
-│       ├── test_audit.py
-│       ├── agents/
-│       │   ├── test_collector.py
-│       │   ├── test_validator.py
-│       │   ├── test_recommender.py
-│       │   └── test_executor.py
-│       ├── adapters/
-│       │   └── test_slack.py
-│       └── api/
-│           └── test_routes.py
-├── frontend/
-│   └── app/
-│       └── page.tsx          # Full approval dashboard (Next.js 14)
+│   └── tests/                 # 47 tests, >90% coverage
 ├── policies/
-│   └── default.yaml          # Governance policy ruleset (hot-reloadable)
-├── docker/
-│   └── Dockerfile
+│   └── default.yaml           # Hot-reloadable governance rules
+├── frontend/                  # Next.js approval dashboard
+├── BOB_SHELL_AUDIT_TRAIL.md   # IBM Bob Shell audit log
 ├── docker-compose.yml
-├── render.yaml               # Render.com deployment config
-├── requirements.txt
-├── pyproject.toml
+├── render.yaml
 └── README.md
 ```
-
----
-
-## 🏆 Challenge Theme
-
-**Wildcard — Build Intelligent Systems for the Future of Work**
-
-NexusFlow directly addresses all three Wildcard challenge goals:
-
-| Challenge Goal | NexusFlow's Answer |
-|----------------|---------------------|
-| Reduce repetitive work | Eliminates 11-day manual decision facilitation cycles |
-| Improve decision-making | Cross-platform context synthesis + risk matrix + 3 ranked options |
-| Help teams achieve outcomes faster | Decision lifecycle: 11 days → under 5 minutes |
-
----
-
-## 🛡️ Governance & Security
-
-- **PII Scanning** — Regex + pattern NER on all ingested text. PII pseudonymised before indexing
-- **Policy Engine** — Hot-reloadable YAML ruleset. No service restart required for policy updates
-- **Authority Graph** — Rule-based routing ensures decisions reach the correct approver by role and financial threshold
-- **Audit Chain** — Every pipeline action generates a SHA-256 receipt chained to all previous receipts. Tamper-evident by design
-- **Prompt Injection Prevention** — All agent prompts are templated. Dynamic input injected only into designated fields, never into system prompt text
-
----
-
-## 🚀 Deployment
-
-NexusFlow is deployed on Render.com. Configuration is in `render.yaml`.
-
-**Backend:** FastAPI on Render free tier ($0/month for prototype)
-**Database:** PostgreSQL on Render free tier
-**Audit DB:** SQLite (portable, committed per deployment)
-**Frontend:** Next.js on Render static site
-
-Total hosting cost for prototype: **$0/month**
 
 ---
 
@@ -402,5 +332,8 @@ MIT License — see [LICENSE](LICENSE) file.
 
 <div align="center">
   <strong>NexusFlow</strong> · Built with IBM Bob · AI Builders Challenge 2026 · Wildcard Track<br>
-  <em>The autonomous operating system for the intelligent enterprise.</em>
+  <em>The autonomous operating system for the intelligent enterprise.</em><br><br>
+  <a href="https://nexusflow-api-e6u8.onrender.com">Live API</a> ·
+  <a href="https://nexusflow-api-e6u8.onrender.com/docs">API Docs</a> ·
+  <a href="https://github.com/ekpenyongasuquo/nexusflow">GitHub</a>
 </div>
