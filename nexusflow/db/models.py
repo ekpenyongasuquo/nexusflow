@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    Boolean, DateTime, Float, ForeignKey, Integer,
+    Boolean, DateTime, Float, ForeignKey, Index, Integer,
     String, Text, JSON, Enum as SAEnum
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -102,6 +102,35 @@ class Pipeline(Base):
 
 
 # ── Audit Receipt (append-only SQLite) ───────────────────────────────────────
+
+class EpisodicMemoryRecord(Base):
+    """
+    Persisted episodic memory episode.  Written once after each completed
+    pipeline; never updated.  Lives in the audit SQLite DB alongside
+    ``AuditReceiptRecord``.
+
+    Indexed on ``trigger_type`` for fast ``recall()`` lookups and on
+    ``created_at`` for chronological ordering.
+    """
+    __tablename__ = "episodic_memories"
+    __table_args__ = (
+        Index("ix_episodic_memories_trigger_type", "trigger_type"),
+        Index("ix_episodic_memories_created_at", "created_at"),
+    )
+
+    memory_id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
+    pipeline_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    trigger_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    # First 300 chars of DecisionBrief.context_summary — supports BM25 search
+    context_summary: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    outcome: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+    option_selected: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    confidence_score: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    duration_seconds: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Flat list: [trigger_type, *affected_systems]
+    tags: Mapped[list] = mapped_column(JSON, default=list)
+
 
 class AuditReceiptRecord(Base):
     """

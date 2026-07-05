@@ -7,6 +7,10 @@ causal chain, and risk matrix.
 Uses hybrid FAISS index for relevant passage retrieval,
 then calls an LLM for synthesis. Falls back to extractive
 summary if no LLM is configured.
+
+Episodic memory: the top-3 most similar past episodes are retrieved
+from ``MemoryStore`` and injected into the LLM prompt as a
+"Past Decision Context" block, giving the system institutional memory.
 """
 from __future__ import annotations
 
@@ -17,6 +21,7 @@ from datetime import datetime, timezone
 import httpx
 
 from nexusflow.core.indexer import HybridIndex, IndexedDocument
+from nexusflow.core.memory import EpisodicMemory, memory_store
 from nexusflow.core.models import (
     DecisionBrief,
     PipelineState,
@@ -32,6 +37,8 @@ settings = get_settings()
 # System prompt for the Synthesiser LLM call
 _SYSTEM_PROMPT = """You are NexusFlow's Synthesiser Agent — an enterprise decision intelligence system.
 You receive a corpus of enterprise signals (Slack messages, JIRA tickets, GitHub PRs) and must produce a structured decision brief.
+
+When "Past Decision Context" is provided, use it to calibrate your confidence score and refine recommendations — similar past outcomes are strong priors. Do not repeat past decisions verbatim; extract patterns and apply them to the current situation.
 
 Respond ONLY with valid JSON matching this exact schema:
 {
@@ -59,6 +66,10 @@ async def run_synthesiser_agent(state: PipelineState) -> PipelineState:
 
     Input:  PipelineState with corpus populated
     Output: PipelineState with brief populated
+
+    Episodic memory is consulted before the LLM call: the top-3 most
+    similar past episodes are formatted as "Past Decision Context" and
+    prepended to the user message so the model can learn from history.
     """
     logger.info("[L2-SYNTHESISER] Pipeline %s — starting synthesis", state.pipeline_id)
     state.status = PipelineStatus.SYNTHESISING
@@ -81,8 +92,11 @@ async def run_synthesiser_agent(state: PipelineState) -> PipelineState:
         f"[{doc.source.upper()}] {doc.text}" for doc, _ in top_docs
     )
 
+    # ── Recall similar past episodes from episodic memory ────────────────────
+    past_episodes = await _recall_past_episodes(query)
+
     # ── LLM synthesis ─────────────────────────────────────────────────────────
-    brief_data = await _call_llm(context_passages, state.trigger_type)
+    brief_data = await _call_llm(context_passages, state.trigger_type, past_episodes)
 
     if brief_data is None:
         # Fallback: extractive summary from top passages
@@ -104,22 +118,82 @@ async def run_synthesiser_agent(state: PipelineState) -> PipelineState:
 
     state.brief = brief
     logger.info(
-        "[L2-SYNTHESISER] Pipeline %s — brief generated. Confidence: %.2f",
-        state.pipeline_id, brief.confidence_score,
+        "[L2-SYNTHESISER] Pipeline %s — brief generated. Confidence: %.2f "
+        "(informed by %d past episode(s))",
+        state.pipeline_id,
+        brief.confidence_score,
+        len(past_episodes),
     )
     return state
 
 
-async def _call_llm(context: str, trigger_type: str) -> dict | None:
+async def _recall_past_episodes(query: str) -> list[EpisodicMemory]:
+    """
+    Query episodic memory for the top-3 episodes most similar to ``query``.
+    Errors are suppressed — a warm memory is helpful but never blocking.
+    """
+    try:
+        return await memory_store.recall_similar(query, limit=3)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[L2-SYNTHESISER] Memory recall failed (non-fatal): %s", exc)
+        return []
+
+
+def _format_past_episodes(episodes: list[EpisodicMemory]) -> str:
+    """
+    Render a list of episodes as a compact human-readable block suitable
+    for injection into the LLM user message.
+
+    Returns an empty string when there are no episodes so the prompt
+    remains unchanged when memory is empty.
+    """
+    if not episodes:
+        return ""
+
+    lines = ["--- Past Decision Context (most similar episodes) ---"]
+    for i, ep in enumerate(episodes, start=1):
+        lines.append(
+            f"{i}. [{ep.trigger_type}] outcome={ep.outcome} "
+            f"confidence={ep.confidence_score:.2f} "
+            f"option_selected={ep.option_selected!r}\n"
+            f"   Summary: {ep.context_summary}"
+        )
+    lines.append("--- End Past Decision Context ---")
+    return "\n".join(lines)
+
+
+async def _call_llm(
+    context: str,
+    trigger_type: str,
+    past_episodes: list[EpisodicMemory] | None = None,
+) -> dict | None:
     """
     Call OpenRouter (Llama 3.3 70B) for synthesis.
-    Returns parsed JSON dict or None if unavailable.
+
+    Parameters
+    ----------
+    context:
+        Concatenated top-k retrieved passages from the corpus.
+    trigger_type:
+        Pipeline trigger type string.
+    past_episodes:
+        Up to 3 similar past episodes from episodic memory.
+        When present they are prepended to the user message as
+        "Past Decision Context" so the model can reason from history.
+
+    Returns
+    -------
+    dict | None
+        Parsed JSON brief dict, or ``None`` when the LLM is unavailable.
     """
     if not settings.openrouter_api_key:
         logger.info("[L2-SYNTHESISER] No LLM configured — using extractive fallback")
         return None
 
+    past_context_block = _format_past_episodes(past_episodes or [])
     user_message = (
+        f"{past_context_block}\n\n" if past_context_block else ""
+    ) + (
         f"Trigger Type: {trigger_type}\n\n"
         f"Enterprise Signals Corpus:\n{context}\n\n"
         "Produce the decision brief JSON now."
