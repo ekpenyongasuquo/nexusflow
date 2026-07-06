@@ -202,9 +202,9 @@ async def approve_pipeline(
         )
 
     # Reconstruct state from DB
-    state = PipelineState(
+     state = PipelineState(
         pipeline_id=pipeline_id,
-        trigger_type=record.trigger_type,
+        trigger_type=record.trigger_type.replace("TriggerType.", ""),
         trigger_source=record.trigger_source,
         trigger_metadata=record.trigger_metadata or {},
         status=PipelineStatus.AWAITING_HUMAN,
