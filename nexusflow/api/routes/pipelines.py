@@ -202,7 +202,7 @@ async def approve_pipeline(
         )
 
     # Reconstruct state from DB
-     state = PipelineState(
+    state = PipelineState(
         pipeline_id=pipeline_id,
         trigger_type=record.trigger_type.replace("TriggerType.", ""),
         trigger_source=record.trigger_source,
@@ -243,9 +243,9 @@ async def approve_pipeline(
     record.decision_json = body.model_dump()
 
     return PipelineResponse(
-        pipeline_id=pipeline_id,
-        status=PipelineStatus.EXECUTING,
-        trigger_type=record.trigger_type,
+        pipeline_id=record.id,
+        status=record.status,
+        trigger_type=record.trigger_type.replace("TriggerType.", ""),
         created_at=record.created_at,
     )
 
